@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
+<Project>
+  <PropertyGroup>
+    <VersionPrefix>17.15.0</VersionPrefix>
+    <PackageValidationBaselineVersion>17.14.0-preview-25161-14</PackageValidationBaselineVersion>
+    <AssemblyVersion>15.1.0.0</AssemblyVersion>
+    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
+    <!--
+      Don't use shipping versions when building in the VMR unless the VMR directs the build to use shipping versions.
+      This can cause issues when building downstream repos in the orchestrated build if the time MSBuild
+      is built crosses a UTC date boundary.
+    -->
+    <DotNetUseShippingVersions Condition="'$(DotNetBuildOrchestrator)' != 'true'">true</DotNetUseShippingVersions>
+    <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
+    <SemanticVersioningV1>true</SemanticVersioningV1>
+    <MicroBuildPluginsSwixBuildVersion>1.1.87</MicroBuildPluginsSwixBuildVersion>
+  </PropertyGroup>
+  <!-- Repo Toolset Features -->
+  <PropertyGroup>
+    <UsingToolIbcOptimization>true</UsingToolIbcOptimization>
+    <UsingToolVisualStudioIbcTraining>true</UsingToolVisualStudioIbcTraining>
+    <UsingToolMicrosoftNetCompilers>true</UsingToolMicrosoftNetCompilers>
+    <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
+    <UsingToolVSSDK>true</UsingToolVSSDK>
+  </PropertyGroup>
+  <!-- Production Dependencies -->
+  <!-- Condition consumption of maintenance-packages dependencies based on source build.
+       This is to prevent "package downgrade" errors coming from other packages that are
+       already consuming the newest version of these same dependencies. -->
+  <PropertyGroup Condition="'$(DotNetBuildSourceOnly)' == 'true'">
+    <!-- Use newest package versions. -->
+    <SystemMemoryVersion>4.6.2</SystemMemoryVersion>
+    <SystemRuntimeCompilerServicesUnsafeVersion>6.1.1</SystemRuntimeCompilerServicesUnsafeVersion>
+    <MicrosoftIORedistVersion>6.1.2</MicrosoftIORedistVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(DotNetBuildSourceOnly)' != 'true'">
+    <!-- Keep using older versions. Upgrade carefully. -->
+    <!--
+        Modifying the version of System.Memory is very high impact and causes downstream breaks in third-party tooling that uses the MSBuild API.
+        When updating the version of System.Memory file a breaking change here: https://github.com/dotnet/docs/issues/new?assignees=gewarren&labels=breaking-change%2CPri1%2Cdoc-idea&template=breaking-change.yml&title=%5BBreaking+change%5D%3A+
+        and follow the guidelines written here (internal-link): https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/1796/How-to-add-a-Known-Issue
+    -->
+    <SystemMemoryVersion>4.5.5</SystemMemoryVersion>
+    <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
+    <MicrosoftIORedistVersion>6.0.1</MicrosoftIORedistVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <!-- manually maintained versions -->
+    <MicrosoftVisualStudioOpenTelemetryVersion>0.2.104-beta</MicrosoftVisualStudioOpenTelemetryVersion>
+    <SystemSecurityPrincipalWindowsVersion>5.0.0</SystemSecurityPrincipalWindowsVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <!-- dotnet/runtime packages -->
+    <SystemCollectionsImmutableVersion>9.0.0</SystemCollectionsImmutableVersion>
+    <SystemConfigurationConfigurationManagerVersion>9.0.0</SystemConfigurationConfigurationManagerVersion>
+    <SystemDiagnosticsDiagnosticSourceVersion>9.0.0</SystemDiagnosticsDiagnosticSourceVersion>
+    <SystemDiagnosticsEventLogVersion>9.0.0</SystemDiagnosticsEventLogVersion>
+    <SystemFormatsAsn1Version>9.0.0</SystemFormatsAsn1Version>
+    <SystemFormatsNrbfVersion>9.0.0</SystemFormatsNrbfVersion>
+    <SystemReflectionMetadataVersion>9.0.0</SystemReflectionMetadataVersion>
+    <SystemReflectionMetadataLoadContextVersion>9.0.0</SystemReflectionMetadataLoadContextVersion>
+    <SystemResourcesExtensionsVersion>9.0.0</SystemResourcesExtensionsVersion>
+    <SystemSecurityCryptographyProtectedDataVersion>9.0.0</SystemSecurityCryptographyProtectedDataVersion>
+    <SystemTextEncodingCodePagesVersion>9.0.0</SystemTextEncodingCodePagesVersion>
+    <SystemTextJsonVersion>9.0.0</SystemTextJsonVersion>
+    <SystemThreadingChannelsVersion>9.0.0</SystemThreadingChannelsVersion>
+    <SystemThreadingTasksDataflowVersion>9.0.0</SystemThreadingTasksDataflowVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <!-- maintained in eng/dependabot/Packages.props -->
+    <!--
+    <SystemCodeDomVersion></SystemCodeDomVersion>
+    <SystemSecurityCryptographyPkcsVersion></SystemSecurityCryptographyPkcsVersion>
+    <SystemSecurityCryptographyXmlVersion></SystemSecurityCryptographyXmlVersion>
+    <MicrosoftBclCryptographyVersion></MicrosoftBclCryptographyVersion>
+    <MicrosoftVisualStudioSolutionPersistenceVersion></MicrosoftVisualStudioSolutionPersistenceVersion>
+    -->
+  </PropertyGroup>
+  <!-- Toolset Dependencies -->
+  <PropertyGroup>
+    <!-- DotNetCliVersion MUST match the dotnet version in global.json.
+         Otherwise, this version of dotnet will not be installed and the build will error out. -->
+    <DotNetCliVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\global.json')), '"dotnet": "([^"]*)"').Groups.get_Item(1))</DotNetCliVersion>
+    <MicrosoftCodeAnalysisCollectionsVersion>4.2.0-1.22102.8</MicrosoftCodeAnalysisCollectionsVersion>
+    <MicrosoftDotNetXUnitExtensionsVersion>9.0.0-beta.25164.2</MicrosoftDotNetXUnitExtensionsVersion>
+    <MicrosoftNetCompilersToolsetVersion>4.14.0-3.25171.27</MicrosoftNetCompilersToolsetVersion>
+    <NuGetBuildTasksVersion>6.14.0-preview.1.89</NuGetBuildTasksVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
+    <BootstrapSdkVersion>9.0.200-preview.0.24603.3</BootstrapSdkVersion>
+  </PropertyGroup>
+  <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
+    <!-- See https://github.com/dotnet/arcade/issues/3386
+
+         Arcade doesn't support this directly; AutoGenerateAssemblyVersion
+         set to false means that FileVersion=$(AssemblyVersion), but that's
+         not ok for MSBuild because we have a fixed AssemblyVersion for
+         compat (15.1.0.0), but varied FileVersion, which is user-visible
+         via $(MSBuildVersion) and msbuild -version.
+
+         So: we want this to match the NuGet package version and also the
+         AssemblyInformationalVersion. Jump through hoops to do so.
+         -->
+    <PropertyGroup>
+      <FileVersion>$(VersionPrefix).$(FileVersion.Split('.')[3])</FileVersion>
+    </PropertyGroup>
+  </Target>
+</Project>
