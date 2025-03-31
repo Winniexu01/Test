@@ -9,3 +9,4 @@ done
 ScriptRoot="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 . "$ScriptRoot/eng/common/build.sh" --build --restore "$@"
+ 
