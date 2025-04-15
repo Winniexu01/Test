@@ -282,7 +282,7 @@ stages:
     - ${{ if eq(parameters.RunSourceBuild, true) }}:
       - job:
         displayName: Source Build
-        timeoutInMinutes: 15
+        timeoutInMinutes: 16
         variables:
           DOTNET_NUGET_SIGNATURE_VERIFICATION: true
         pool:
