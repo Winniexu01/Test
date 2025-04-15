@@ -58,11 +58,9 @@ stages:
       parameters:
         displayName: Unit Tests on Windows (.NET Framework 4.7.2)
         osName: Windows
-        ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          agentPool: NetCore-Public
+        ${{ if eq(variables['System.TeamProject'], 'Test') }}:
+          agentPool: Azure Pipelines
           agentDemands: ImageOverride -equals Windows.VS2022.Amd64.Open
-        ${{ else }}:
-          agentPool: VSEngSS-MicroBuild2022-1ES
         testType: Unit
         testTargetFramework: net472
 
@@ -75,11 +73,9 @@ stages:
       parameters:
         displayName: Unit Tests on Windows (.NET 9.0)
         osName: Windows
-        ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          agentPool: NetCore-Public
+        ${{ if eq(variables['System.TeamProject'], 'Test') }}:
+          agentPool: Azure Pipelines
           agentDemands: ImageOverride -equals Windows.VS2022.Amd64.Open
-        ${{ else }}:
-          agentPool: VSEngSS-MicroBuild2022-1ES
         testType: Unit
         testTargetFramework: net9.0
 
@@ -92,11 +88,9 @@ stages:
       parameters:
         displayName: Unit Tests on Windows (.NET Core 3.1)
         osName: Windows
-        ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          agentPool: NetCore-Public
+        ${{ if eq(variables['System.TeamProject'], 'Test') }}:
+          agentPool: Azure Pipelines
           agentDemands: ImageOverride -equals Windows.VS2022.Amd64.Open
-        ${{ else }}:
-          agentPool: VSEngSS-MicroBuild2022-1ES
         testType: Unit
         testTargetFramework: netcoreapp3.1
 
@@ -109,11 +103,9 @@ stages:
       parameters:
         displayName: Msbuild.Integration.Test on Windows (.NET Framework 4.7.2)
         osName: Windows
-        ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          agentPool: NetCore-Public
+        ${{ if eq(variables['System.TeamProject'], 'Test') }}:
+          agentPool: Azure Pipelines
           agentDemands: ImageOverride -equals Windows.VS2022.Amd64.Open
-        ${{ else }}:
-          agentPool: VSEngSS-MicroBuild2022-1ES
         testType: Functional
         testTargetFramework: net472
         testProjectName: Msbuild.Integration.Test
@@ -127,11 +119,9 @@ stages:
       parameters:
         displayName: NuGet.CommandLine.FuncTest on Windows (.NET Framework 4.7.2)
         osName: Windows
-        ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          agentPool: NetCore-Public
+        ${{ if eq(variables['System.TeamProject'], 'Test') }}:
+          agentPool: Azure Pipelines
           agentDemands: ImageOverride -equals Windows.VS2022.Amd64.Open
-        ${{ else }}:
-          agentPool: VSEngSS-MicroBuild2022-1ES
         testType: Functional
         testTargetFramework: net472
         testProjectName: NuGet.CommandLine.FuncTest
@@ -146,11 +136,9 @@ stages:
       parameters:
         displayName: NuGet.CommandLine.Test on Windows (.NET Framework 4.7.2)
         osName: Windows
-        ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          agentPool: NetCore-Public
+        ${{ if eq(variables['System.TeamProject'], 'Test') }}:
+          agentPool: Azure Pipelines
           agentDemands: ImageOverride -equals Windows.VS2022.Amd64.Open
-        ${{ else }}:
-          agentPool: VSEngSS-MicroBuild2022-1ES
         testType: Functional
         testTargetFramework: net472
         testProjectName: NuGet.CommandLine.Test
@@ -166,11 +154,9 @@ stages:
       parameters:
         displayName: NuGet.Packaging.FuncTest on Windows (.NET Framework 4.7.2)
         osName: Windows
-        ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          agentPool: NetCore-Public
+        ${{ if eq(variables['System.TeamProject'], 'Test') }}:
+          agentPool: Azure Pipelines
           agentDemands: ImageOverride -equals Windows.VS2022.Amd64.Open
-        ${{ else }}:
-          agentPool: VSEngSS-MicroBuild2022-1ES
         testType: Functional
         testTargetFramework: net472
         testProjectName: NuGet.Packaging.FuncTest
@@ -184,11 +170,9 @@ stages:
       parameters:
         displayName: Dotnet.Integration.Test on Windows (.NET 9.0)
         osName: Windows
-        ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          agentPool: NetCore-Public
+        ${{ if eq(variables['System.TeamProject'], 'Test') }}:
+          agentPool: Azure Pipelines
           agentDemands: ImageOverride -equals Windows.VS2022.Amd64.Open
-        ${{ else }}:
-          agentPool: VSEngSS-MicroBuild2022-1ES
         testType: Functional
         testTargetFramework: net9.0
         testProjectName: Dotnet.Integration.Test
@@ -203,11 +187,9 @@ stages:
       parameters:
         displayName: NuGet.Packaging.FuncTest on Windows (.NET 9.0)
         osName: Windows
-        ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          agentPool: NetCore-Public
+        ${{ if eq(variables['System.TeamProject'], 'Test') }}:
+          agentPool: Azure Pipelines
           agentDemands: ImageOverride -equals Windows.VS2022.Amd64.Open
-        ${{ else }}:
-          agentPool: VSEngSS-MicroBuild2022-1ES
         testType: Functional
         testTargetFramework: net9.0
         testProjectName: NuGet.Packaging.FuncTest
