@@ -1,11 +1,9 @@
 {
-    "instanceUrl": "https://devdiv.visualstudio.com/",
-    "template": "TFSDEVDIV",
-    "projectName": "DEVDIV",
-    "areaPath": "DevDiv\\NET Tools Prague\\MSBuild",
+    "tsaVersion": "TsaV2",
+    "codebaseName": "NuGet.Client-Trusted_dev",
+    "instanceUrl": "DEVDIV",
+    "projectName": "DevDiv",
+    "areaPath": "DevDiv\\NuGet\\NuGet Clients",
     "iterationPath": "DevDiv",
-    "notificationAliases": [ "msbtm@microsoft.com" ],
-    "repositoryName": "MSBuild",
-    "codebaseName": "MSBuild",
-    "serviceTreeId": "d0ebbe59-0779-4466-8280-a0ff9cab5550"
+    "allTools": true
 }

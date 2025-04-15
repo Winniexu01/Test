@@ -1,15 +1,5 @@
-# Users referenced in this file will automatically be requested as reviewers for PRs that modify the given paths.
-# See https://help.github.com/articles/about-code-owners/
-
-/eng/DotNetBuild.props  @dotnet/product-construction
-/eng/SourceBuild*       @dotnet/source-build
-/eng/                   @dotnet/kitten
-/.github/               @dotnet/kitten
-/global.json            @dotnet/kitten
-/.exp-insertions.yml    @dotnet/kitten
-/.opt-prof.yml          @dotnet/kitten
-/.vsts-dotnet-ci.yml    @dotnet/kitten
-/.vsts-dotnet.yml       @dotnet/kitten
-/NuGet.config           @dotnet/kitten
-/Directory.Build*       @dotnet/kitten
-/.git*                  @dotnet/kitten
+# These owners will be the default owners for everything in
+# the repo. Unless a later match takes precedence,
+# review when someone opens a pull request.
+# For more on how to customize the CODEOWNERS file - https://help.github.com/en/articles/about-code-owners
+*       @NuGet/nuget-client

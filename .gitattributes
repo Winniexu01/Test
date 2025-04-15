@@ -1,29 +1,74 @@
-###############################################################################
-# Set default behavior to automatically normalize line endings.
-###############################################################################
-* text=auto
+# Auto detect text files and perform LF normalization
+*       text=auto
 
-# Force bash scripts to always use lf line endings so that if a repro is accessed
-# in Unix via a file share from Windows, the scripts will work.
+.gitattributes text
+.gitignore text
+
+project.json text
+
+*.doc   diff=astextplain
+*.DOC	diff=astextplain
+*.docx	diff=astextplain
+*.DOCX	diff=astextplain
+*.dot	diff=astextplain
+*.DOT	diff=astextplain
+*.pdf	diff=astextplain
+*.PDF	diff=astextplain
+*.rtf	diff=astextplain
+*.RTF	diff=astextplain
+
+*.asm   text
+*.c     text
+*.config text
+*.cpp   text
+*.clj   text
+*.cs    text diff=csharp
+*.css   text
+*.cxx   text
+*.erl   text
+*.fs    text
+*.fsx   text
+*.h     text
+*.hs    text
+*.htm   text diff=html
+*.html  text diff=html
+*.hxx   text
+*.java  text
+*.js    text
+*.json  text
+*.less  text
+*.lisp  text
+*.lua   text
+*.m     text
+*.md    text
+*.php   text
+*.ps1   text
+*.py    text
+*.rb    text
+*.resx  text
+*.sass  text
+*.scss  text
+*.sql   text
+*.vb    text
+
+# Unix artifacts
 *.sh text eol=lf
 
-# Ensure .bin files are stored as binary
-*.bin binary
+# Visual Studio artifacts
+*.csproj text eol=crlf
+*.dbproj text eol=crlf
+*.filters text eol=crlf
+*.fsproj text eol=crlf
+*.props text eol=crlf
+*.sln   text eol=crlf
+*.targets text eol=crlf
+*.vbproj text eol=crlf
+*.vcxitems text eol=crlf
+*.vcxproj text eol=crlf
 
-###############################################################################
-# Linguist customization (https://github.com/github/linguist#overrides)
-###############################################################################
-
-# Include MSBuild in repo stats
-src/Tasks/*.props linguist-detectable=true
-src/Tasks/*.targets linguist-detectable=true
-src/Tasks/*.tasks linguist-detectable=true
-
-# Don't include Arcade-owned path
-eng/common/** linguist-vendored linguist-generated
-
-# Display XLF files collapsed by default in PR diffs
-*.xlf linguist-generated=true
-
-# VerifyTests
-*.verified.txt text eol=lf working-tree-encoding=UTF-8
+# Denote all files that are truly binary and should not be modified.
+*.gif 	binary
+*.jpg  	binary
+*.pem   binary
+*.png 	binary
+*.zip   binary

@@ -1,6 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Project>
-    <PropertyGroup>
-        <PublishingVersion>3</PublishingVersion>
-    </PropertyGroup>
+
+  <ItemGroup>
+    <Artifact Include="$(ArtifactsDir)nupkgs/*.nupkg"
+              Kind="Package">
+      <Visibility Condition="'$(EnableDefaultRidSpecificArtifacts)' == 'true' and '$(DotNetBuildOrchestrator)' == 'true'">Vertical</Visibility>
+    </Artifact>
+  </ItemGroup>
+
 </Project>

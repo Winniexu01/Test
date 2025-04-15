@@ -1,1 +1,4 @@
-/verbosity:minimal /m /clp:Summary
+/ConsoleLoggerParameters:Verbosity=Minimal;Summary;ForceNoAlign
+/MaxCPUCount
+/NodeReuse:false
+/Restore

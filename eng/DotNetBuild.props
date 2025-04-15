@@ -1,21 +1,14 @@
-<!-- When altering this file, include @dotnet/product-construction as a reviewer. -->
-
+<!-- Whenever altering this or other Source Build files, please include @NikolaMilosavljevic or @MichaelSimons as a reviewer. -->
 <Project>
 
   <PropertyGroup>
-    <GitHubRepositoryName>msbuild</GitHubRepositoryName>
+    <GitHubRepositoryName>nuget-client</GitHubRepositoryName>
     <SourceBuildManagedOnly>true</SourceBuildManagedOnly>
+    <VersionPrefix>1.0.0</VersionPrefix>
+
+    <!-- Addresses empty intermediate issue originally found by https://github.com/dotnet/arcade/pull/13067 -->
+    <!-- Should be removed once https://github.com/NuGet/Home/issues/11059 is implemented -->
+    <AllowEmptySourceBuiltIntermediates>true</AllowEmptySourceBuiltIntermediates>
   </PropertyGroup>
-
-  <Target Name="ConfigureInnerBuildArgs" BeforeTargets="GetSourceBuildCommandConfiguration"
-          Condition="'$(DotNetBuildSourceOnly)' == 'true'">
-    <PropertyGroup>
-      <!-- Filter down projects aggressively in source-only modes. -->
-      <InnerBuildArgs>$(InnerBuildArgs) /p:Projects="$(InnerSourceBuildRepoRoot)MSBuild.SourceBuild.slnf"</InnerBuildArgs>
-
-      <!-- Disable package validation as source build filters out target frameworks. -->
-      <InnerBuildArgs>$(InnerBuildArgs) /p:EnablePackageValidation=false</InnerBuildArgs>
-    </PropertyGroup>
-  </Target>
 
 </Project>
