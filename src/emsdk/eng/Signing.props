@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <UseDotNetCertificate>true</UseDotNetCertificate>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FileExtensionSignInfo Include=".pyd" CertificateName="MicrosoftDotNet500" />
+    <FileExtensionSignInfo Include=".cat" CertificateName="MicrosoftDotNet500" />
+
+    <!-- We don't need to code sign .js files because they are not used in Windows Script Host. -->
+    <FileExtensionSignInfo Update=".js" CertificateName="None" />
+
+    <!--
+      Zero length files should not be signed because it breaks signing/ESRP.
+    -->
+    <FileSignInfo Include="__init__.py" CertificateName="None" />
+    <FileSignInfo Include="eggs.py" CertificateName="None" />
+
+    <!-- fails to sign via ESRP, skip for now -->
+    <FileSignInfo Include="libbinaryen.dylib" CertificateName="None" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ItemsToSign Include="$(VisualStudioSetupInsertionPath)\**\*.msi" Condition="'$(PostBuildSign)' != 'true'" />
+    <ItemsToSign Include="$(ArtifactsPackagesDir)**\*.wixpack.zip" Condition="'$(PostBuildSign)' != 'true'" />
+    <ItemsToSignPostBuild Include="$(VisualStudioSetupInsertionPath)\**\*.msi" Condition="'$(PostBuildSign)' == 'true'" />
+    <ItemsToSign Include="$(VisualStudioSetupInsertionPath)\**\*.zip" Condition="'$(PostBuildSign)' != 'true'" />
+    <ItemsToSignPostBuild Include="$(VisualStudioSetupInsertionPath)\**\*.zip" Condition="'$(PostBuildSign)' == 'true'" />
+  </ItemGroup>
+</Project>

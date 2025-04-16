@@ -1,0 +1,62 @@
+<Project>
+
+  <PropertyGroup>
+    <TestHostFolder>$(ArtifactsBinDir)redist\$(Configuration)\dotnet\</TestHostFolder>
+  </PropertyGroup>
+
+  <Target Name="OverlaySdkOnLKG" AfterTargets="Build" DependsOnTargets="GenerateInstallerLayout">
+    <PropertyGroup>
+      <_DotNetHiveRoot>$(DOTNET_INSTALL_DIR)</_DotNetHiveRoot>
+      <_DotNetHiveRoot Condition="'$(_DotNetHiveRoot)' == ''">$(RepoRoot).dotnet/</_DotNetHiveRoot>
+      <_DotNetHiveRoot Condition="!HasTrailingSlash('$(_DotNetHiveRoot)')">$(_DotNetHiveRoot)/</_DotNetHiveRoot>
+    </PropertyGroup>
+
+    <!-- Copy artifacts from the stage0 SDK folder.
+         Ignore the sdk, templates and host files for which only live built artifacts should be used. -->
+    <ItemGroup>
+      <_OverlaySDKFile Include="$(_DotNetHiveRoot)\**\*"
+                       Exclude="$(_DotNetHiveRoot)sdk\**\*;
+                                $(_DotNetHiveRoot)templates\**\*;
+                                $(_DotNetHiveRoot)host\**\*"/>
+      <OverlaySDKFile Include="@(_OverlaySDKFile->'$(TestHostFolder)%(RecursiveDir)%(Filename)%(Extension)')" Source="%(Identity)" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_InstallerOutputFile Include="$(RedistInstallerLayoutPath)**\*" />
+      <InstallerOutputFile Include="@(_InstallerOutputFile->'$(TestHostFolder)%(RecursiveDir)%(Filename)%(Extension)')" Source="%(Identity)" />
+      <!-- Use available live built artifacts instead of stage0 files. -->
+      <InstallerOutputFile Include="@(OverlaySDKFile)" Exclude="@(InstallerOutputFile)" />
+    </ItemGroup>
+
+    <!-- Copy artifacts to the testhost folder. -->
+    <Copy DestinationFiles="@(InstallerOutputFile)"
+          SourceFiles="@(InstallerOutputFile->Metadata('Source'))"
+          SkipUnchangedFiles="true"
+          UseHardLinksIfPossible="true" />
+  </Target>
+
+  <Target Name="PublishTestWorkloads"
+          AfterTargets="OverlaySdkOnLKG">
+    <PropertyGroup>
+      <!-- Calculate the version band (ie the band should still be 5.0.100 if the VersionPrefix is 5.0.101 -->
+      <_VersionPrefixMajor>$(VersionPrefix.Split('.')[0])</_VersionPrefixMajor>
+      <_VersionPrefixMinor>$(VersionPrefix.Split('.')[1])</_VersionPrefixMinor>
+      <_VersionPrefixPatch>$(VersionPrefix.Split('.')[2])</_VersionPrefixPatch>
+      <_VersionPrefixPatchBand>$([System.Convert]::ToUInt16($([MSBuild]::Divide($(_VersionPrefixPatch), 100))))</_VersionPrefixPatchBand>
+      <_VersionPrefixPatchBand>$([MSBuild]::Multiply($(_VersionPrefixPatchBand), 100))</_VersionPrefixPatchBand>
+      <VersionBand>$(_VersionPrefixMajor).$(_VersionPrefixMinor).$(_VersionPrefixPatchBand)</VersionBand>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <WorkloadManifestContent Include="$(RepoRoot)test\TestAssets\TestWorkloads\manifests\**\*.*" />
+      <WorkloadPackContent Include="$(RepoRoot)test\TestAssets\TestWorkloads\packs\**\*.*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(WorkloadManifestContent)"
+          DestinationFiles="@(WorkloadManifestContent->'$(TestHostFolder)sdk-manifests\$(VersionBand)\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <Copy SourceFiles="@(WorkloadPackContent)"
+          DestinationFiles="@(WorkloadPackContent->'$(TestHostFolder)packs\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+</Project>

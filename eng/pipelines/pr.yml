@@ -1,311 +1,57 @@
-parameters:
-- name: RunUnitTestsOnWindows
-  displayName: Run unit tests on Windows
-  type: boolean
-  default: true
-- name: RunFunctionalTestsOnWindows
-  displayName: Run functional tests on Windows
-  type: boolean
-  default: true
-- name: RunUnitTestsOnLinux
-  displayName: Run unit tests on Linux
-  type: boolean
-  default: true
-- name: RunFunctionalTestsOnLinux
-  displayName: Run functional tests on Linux
-  type: boolean
-  default: true
-- name: RunUnitTestsOnMacOS
-  displayName: Run unit tests on MacOS
-  type: boolean
-  default: true
-- name: RunFunctionalTestsOnMacOS
-  displayName: Run functional tests on MacOS
-  type: boolean
-  default: true
-- name: RunSourceBuild
-  displayName: Run a SourceBuild build
-  type: boolean
-  default: true
-- name: RunStaticAnalysis
-  displayName: Run a static analysis
-  type: boolean
-  default: true
+# This yml is used by these PR pipelines and triggers:
+# NOTE: the triggers are defined in the Azure DevOps UI as they are too complex
+#
+# - dotnet-source-build (public)
+#   https://dev.azure.com/dnceng-public/public/_build?definitionId=240
+#   - PR: ultralite build
+#   - CI: release/* only, every batched commit, full build
+#   - Schedule: main only, full build
+#
+# - dotnet-unified-build (public)
+#   https://dev.azure.com/dnceng-public/public/_build?definitionId=278
+#   - PR: lite build
+#   - CI: release/* only, every batched commit, full build
+#   - Schedule: main only, full build
+#
+# - dotnet-unified-build-full (public)
+#   https://dev.azure.com/dnceng-public/public/_build?definitionId=303
+#   Comment trigger only
+
 variables:
-  DOTNET_NOLOGO: 1
-  NUGET_EXPERIMENTAL_CHAIN_BUILD_RETRY_POLICY: 3,1000
-  SkipSigning: true
-  CI: true
-  Codeql.Enabled: false
+# enable source-only build for pipelines that contain the -source-build string
+- name: isSourceOnlyBuild
+  value: ${{ contains(variables['Build.DefinitionName'], '-source-build') }}
 
-trigger:
-  branches:
-    include:
-    - dev
+- name: isSourceOnlyBuildLite
+  value: ${{ contains(variables['Build.DefinitionName'], '-source-build-lite') }}
 
-pr:
-  branches:
-    include:
-    - '*'
+- name: isScheduleTrigger
+  value: ${{ eq(variables['Build.Reason'], 'Schedule') }}
+
+- name: isPRTrigger
+  value: ${{ eq(variables['Build.Reason'], 'PullRequest') }}
+
+- ${{ if eq(variables['System.TeamProject'], 'public') }}:
+  - name: skipComponentGovernanceDetection  # we run CG on internal builds only
+    value: true
+
+  - name: Codeql.Enabled  # we run CodeQL on internal builds only
+    value: false
+
+- template: /eng/common/templates/variables/pool-providers.yml@self
 
 stages:
-- ${{ if eq(parameters.RunUnitTestsOnWindows, true) }}:
-  - stage:
-    displayName: Unit Tests on Windows (.NET Framework 4.7.2)
-    dependsOn: []
-    jobs:
-    - template: pr.job.yml
-      parameters:
-        displayName: Unit Tests on Windows (.NET Framework 4.7.2)
-        osName: Windows
-        ${{ if eq(variables['System.TeamProject'], 'Test') }}:
-          agentPool: Azure Pipelines
-          agentDemands: ImageOverride -equals Windows.VS2022.Amd64.Open
-        testType: Unit
-        testTargetFramework: net472
-
-- ${{ if eq(parameters.RunUnitTestsOnWindows, true) }}:
-  - stage:
-    displayName: Unit Tests on Windows (.NET 9.0)
-    dependsOn: []
-    jobs:
-    - template: pr.job.yml
-      parameters:
-        displayName: Unit Tests on Windows (.NET 9.0)
-        osName: Windows
-        ${{ if eq(variables['System.TeamProject'], 'Test') }}:
-          agentPool: Azure Pipelines
-          agentDemands: ImageOverride -equals Windows.VS2022.Amd64.Open
-        testType: Unit
-        testTargetFramework: net9.0
-
-- ${{ if eq(parameters.RunUnitTestsOnWindows, true) }}:
-  - stage:
-    displayName: Unit Tests on Windows (.NET Core 3.1)
-    dependsOn: []
-    jobs:
-    - template: pr.job.yml
-      parameters:
-        displayName: Unit Tests on Windows (.NET Core 3.1)
-        osName: Windows
-        ${{ if eq(variables['System.TeamProject'], 'Test') }}:
-          agentPool: Azure Pipelines
-          agentDemands: ImageOverride -equals Windows.VS2022.Amd64.Open
-        testType: Unit
-        testTargetFramework: netcoreapp3.1
-
-- ${{ if eq(parameters.RunFunctionalTestsOnWindows, true) }}:
-  - stage:
-    displayName: Msbuild.Integration.Test on Windows (.NET Framework 4.7.2)
-    dependsOn: []
-    jobs:
-    - template: pr.job.yml
-      parameters:
-        displayName: Msbuild.Integration.Test on Windows (.NET Framework 4.7.2)
-        osName: Windows
-        ${{ if eq(variables['System.TeamProject'], 'Test') }}:
-          agentPool: Azure Pipelines
-          agentDemands: ImageOverride -equals Windows.VS2022.Amd64.Open
-        testType: Functional
-        testTargetFramework: net472
-        testProjectName: Msbuild.Integration.Test
-
-- ${{ if eq(parameters.RunFunctionalTestsOnWindows, true) }}:
-  - stage:
-    displayName: NuGet.CommandLine.FuncTest on Windows (.NET Framework 4.7.2)
-    dependsOn: []
-    jobs:
-    - template: pr.job.yml
-      parameters:
-        displayName: NuGet.CommandLine.FuncTest on Windows (.NET Framework 4.7.2)
-        osName: Windows
-        ${{ if eq(variables['System.TeamProject'], 'Test') }}:
-          agentPool: Azure Pipelines
-          agentDemands: ImageOverride -equals Windows.VS2022.Amd64.Open
-        testType: Functional
-        testTargetFramework: net472
-        testProjectName: NuGet.CommandLine.FuncTest
-        timeoutInMinutes: 30
-
-- ${{ if eq(parameters.RunFunctionalTestsOnWindows, true) }}:
-  - stage:
-    displayName: NuGet.CommandLine.Test on Windows (.NET Framework 4.7.2)
-    dependsOn: []
-    jobs:
-    - template: pr.job.yml
-      parameters:
-        displayName: NuGet.CommandLine.Test on Windows (.NET Framework 4.7.2)
-        osName: Windows
-        ${{ if eq(variables['System.TeamProject'], 'Test') }}:
-          agentPool: Azure Pipelines
-          agentDemands: ImageOverride -equals Windows.VS2022.Amd64.Open
-        testType: Functional
-        testTargetFramework: net472
-        testProjectName: NuGet.CommandLine.Test
-        testVerbosity: normal
-        timeoutInMinutes: 45
-
-- ${{ if eq(parameters.RunFunctionalTestsOnWindows, true) }}:
-  - stage:
-    displayName: NuGet.Packaging.FuncTest on Windows (.NET Framework 4.7.2)
-    dependsOn: []
-    jobs:
-    - template: pr.job.yml
-      parameters:
-        displayName: NuGet.Packaging.FuncTest on Windows (.NET Framework 4.7.2)
-        osName: Windows
-        ${{ if eq(variables['System.TeamProject'], 'Test') }}:
-          agentPool: Azure Pipelines
-          agentDemands: ImageOverride -equals Windows.VS2022.Amd64.Open
-        testType: Functional
-        testTargetFramework: net472
-        testProjectName: NuGet.Packaging.FuncTest
-
-- ${{ if eq(parameters.RunFunctionalTestsOnWindows, true) }}:
-  - stage:
-    displayName: Dotnet.Integration.Test on Windows (.NET 9.0)
-    dependsOn: []
-    jobs:
-    - template: pr.job.yml
-      parameters:
-        displayName: Dotnet.Integration.Test on Windows (.NET 9.0)
-        osName: Windows
-        ${{ if eq(variables['System.TeamProject'], 'Test') }}:
-          agentPool: Azure Pipelines
-          agentDemands: ImageOverride -equals Windows.VS2022.Amd64.Open
-        testType: Functional
-        testTargetFramework: net9.0
-        testProjectName: Dotnet.Integration.Test
-        timeoutInMinutes: 45
-
-- ${{ if eq(parameters.RunFunctionalTestsOnWindows, true) }}:
-  - stage:
-    displayName: NuGet.Packaging.FuncTest on Windows (.NET 9.0)
-    dependsOn: []
-    jobs:
-    - template: pr.job.yml
-      parameters:
-        displayName: NuGet.Packaging.FuncTest on Windows (.NET 9.0)
-        osName: Windows
-        ${{ if eq(variables['System.TeamProject'], 'Test') }}:
-          agentPool: Azure Pipelines
-          agentDemands: ImageOverride -equals Windows.VS2022.Amd64.Open
-        testType: Functional
-        testTargetFramework: net9.0
-        testProjectName: NuGet.Packaging.FuncTest
-
-- ${{ if eq(parameters.RunUnitTestsOnLinux, true) }}:
-  - stage:
-    displayName: Unit Tests on Linux (.NET 9.0)
-    dependsOn: []
-    jobs:
-    - template: pr.job.yml
-      parameters:
-        displayName: Unit Tests on Linux (.NET 9.0)
-        osName: Linux
-        vmImage: ubuntu-latest
-        testType: Unit
-        testTargetFramework: net9.0
-
-- ${{ if eq(parameters.RunUnitTestsOnLinux, true) }}:
-  - stage:
-    displayName: Unit Tests on Linux (.NET Core 3.1)
-    dependsOn: []
-    jobs:
-    - template: pr.job.yml
-      parameters:
-        displayName: Unit Tests on Linux (.NET Core 3.1)
-        osName: Linux
-        vmImage: ubuntu-22.04
-        testType: Unit
-        testTargetFramework: netcoreapp3.1
-
-- ${{ if eq(parameters.RunFunctionalTestsOnLinux, true) }}:
-  - stage:
-    displayName: Functional Tests on Linux (.NET 9.0)
-    dependsOn: []
-    jobs:
-    - template: pr.job.yml
-      parameters:
-        displayName: Functional Tests on Linux (.NET 9.0)
-        osName: Linux
-        vmImage: ubuntu-latest
-        testType: Functional
-        testTargetFramework: net9.0
-        timeoutInMinutes: 30
-
-- ${{ if eq(parameters.RunUnitTestsOnMacOS, true) }}:
-  - stage:
-    displayName: Unit Tests on MacOS (.NET 9.0)
-    dependsOn: []
-    jobs:
-    - template: pr.job.yml
-      parameters:
-        displayName: Unit Tests on MacOS (.NET 9.0)
-        osName: MacOS
-        vmImage: macos-latest
-        testType: Unit
-        testTargetFramework: net9.0
-
-- ${{ if eq(parameters.RunUnitTestsOnMacOS, true) }}:
-  - stage:
-    displayName: Unit Tests on MacOS (.NET Core 3.1)
-    dependsOn: []
-    jobs:
-    - template: pr.job.yml
-      parameters:
-        displayName: Unit Tests on MacOS (.NET Core 3.1)
-        osName: MacOS
-        vmImage: macos-latest
-        testType: Unit
-        testTargetFramework: netcoreapp3.1
-
-- ${{ if eq(parameters.RunFunctionalTestsOnMacOS, true) }}:
-  - stage:
-    displayName: Functional Tests on MacOS (.NET 9.0)
-    dependsOn: []
-    jobs:
-    - template: pr.job.yml
-      parameters:
-        displayName: Functional Tests on MacOS (.NET 9.0)
-        osName: MacOS
-        vmImage: macos-latest
-        testType: Functional
-        testTargetFramework: net9.0
-        timeoutInMinutes: 30
-
-- ${{ if or(eq(parameters.RunSourceBuild, true), eq(parameters.RunStaticAnalysis, true)) }}:
-  - stage:
-    displayName: Source Build and Static Analysis
-    dependsOn: []
-    jobs:
-    - ${{ if eq(parameters.RunSourceBuild, true) }}:
-      - job:
-        displayName: Source Build
-        timeoutInMinutes: 16
-        variables:
-          DOTNET_NUGET_SIGNATURE_VERIFICATION: true
-        pool:
-          vmImage: ubuntu-latest
-        steps:
-        - task: PowerShell@2
-          displayName: "Run source-build script"
-          inputs:
-            targetType: "inline"
-            script: |
-              ./eng/dotnet-build/build.sh --source-build
-    - ${{ if eq(parameters.RunStaticAnalysis, true) }}:
-      - job:
-        displayName: Run Static Analysis
-        timeoutInMinutes: 15
-        pool:
-          vmImage: windows-latest
-        steps:
-        - task: PowerShell@2
-          displayName: Run configure.ps1
-          inputs:
-            filePath: configure.ps1
-        - script: SET | SORT
-          displayName: Log Environment Variables
-        - script: dotnet format whitespace --verify-no-changes NuGet.sln
-          displayName: Run dotnet format whitespace
+- template: /src/sdk/eng/pipelines/templates/stages/vmr-build.yml
+  parameters:
+    isBuiltFromVmr: true
+    isSourceOnlyBuild: ${{ variables.isSourceOnlyBuild }}
+    ${{ if or(eq(variables.isScheduleTrigger, 'true'), contains(variables['Build.DefinitionName'], '-full')) }}:
+      scope: full
+    ${{ elseif eq(variables.isSourceOnlyBuildLite, 'true') }}:
+      scope: lite
+    ${{ elseif and(eq(variables.isPRTrigger, 'true'), eq(variables.isSourceOnlyBuild, 'true')) }}:
+      scope: ultralite
+    ${{ elseif and(eq(variables.isPRTrigger, 'true'), ne(variables.isSourceOnlyBuild, 'true')) }}:
+      scope: lite
+    ${{ else }}:
+      scope: full

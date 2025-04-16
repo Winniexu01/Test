@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <VersionPrefix>10.0.0</VersionPrefix>
+    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SystemCommandLineVersion>2.0.0-beta4.25167.101</SystemCommandLineVersion>
+  </PropertyGroup>
+</Project>

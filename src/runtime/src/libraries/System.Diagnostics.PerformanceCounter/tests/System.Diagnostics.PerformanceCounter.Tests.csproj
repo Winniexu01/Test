@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>$(NetCoreAppCurrent)-windows;$(NetFrameworkCurrent)</TargetFrameworks>
+    <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="PerformanceCounterTests.cs" />
+    <Compile Include="PerformanceCounterCategoryTests.cs" />
+    <Compile Include="ValidationTests.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
+    <Compile Include="CounterSampleTests.cs" />
+    <Compile Include="CounterSampleCalculatorTests.cs" />
+    <Compile Include="CounterCreationDataTests.cs" />
+    <Compile Include="CounterCreationDataCollectionTests.cs" />
+    <Compile Include="InstanceDataTests.cs" />
+    <Compile Include="Helpers.cs" />
+    <Compile Include="$(CommonTestPath)System\ShouldNotBeInvokedException.cs" Link="Common\System\ShouldNotBeInvokedException.cs" />
+    <Compile Include="PerformanceDataTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="provider.man" CopyToOutputDirectory="Always" />
+    <None Include="provider.res" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+    <!-- Some internal types are needed, so we reference the implementation assembly, rather than the reference assembly. -->
+    <ProjectReference Include="..\src\System.Diagnostics.PerformanceCounter.csproj" SkipUseReferenceAssembly="true" />
+  </ItemGroup>
+</Project>

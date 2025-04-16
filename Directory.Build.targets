@@ -1,41 +1,95 @@
 <Project>
-  <Import Project="build\common.targets" Condition="'$(IsCrossTargetingBuild)' == 'true' And '$(_WasCommonPropsImported)' != 'true'" />
 
-  <!--
-    Gets a list of target frameworks that the project supports.
-  -->
-  <Target Name="GetProjectTargetFrameworks" Returns="@(ProjectTargetFramework)">
+  <Import Project="Sdk.targets" Sdk="Microsoft.DotNet.Arcade.Sdk" Condition="'$(SkipArcadeSdkImport)' != 'true'" />
+
+  <!-- The SkipPrepareSdkArchive switch exists so that outside components like the license scan test pipeline
+       can run a subset of tests that don't need the SDK archive without building the VMR.
+       The switch is also useful for the local dev innerloop to build the test projects without needing to run them. -->
+  <Target Name="DetermineSourceBuiltSdkVersion" Condition="'$(SkipPrepareSdkArchive)' != 'true'">
+    <PropertyGroup>
+      <SdkFilenamePrefix>dotnet-sdk-</SdkFilenamePrefix>
+    </PropertyGroup>
+
     <ItemGroup>
-      <ProjectTargetFramework Include="$(TargetFramework);$(TargetFrameworks)" ProjectFile="$(MSBuildProjectFullPath)" />
+      <SdkTarballItem Condition="'$(SdkTarballPath)' != ''" Include="$(SdkTarballPath)" />
+      <SdkTarballItem Condition="'$(SdkTarballPath)' == ''" Include="$(ArtifactsAssetsDir)Sdk/**/$(SdkFilenamePrefix)*$(ArchiveExtension)"
+                      Exclude="$(ArtifactsAssetsDir)Sdk/**/$(SdkFilenamePrefix)*.wixpack.zip" />
     </ItemGroup>
+
+    <Error Text="Didn't find an SDK archive." Condition="'@(SdkTarballItem)' == ''" />
+    <Error Text="Found more than one SDK archive." Condition="@(SdkTarballItem->Count()) &gt; 1" />
+
+    <!--
+      Extract SDK version from SDK tarball filename.
+      Keep in sync with dotnet-sdk's archive location and filename.
+
+      Example:
+      artifacts\assets\<config>\Sdk\9.0.100-alpha.1.24057.1\dotnet-sdk-9.0.100-alpha.1.24057.1-fedora.38-x64.tar.gz
+      artifacts\assets\<config>\Sdk\<SdkVersion>\dotnet-sdk-<SdkVersion>-<TargetRid><ArchiveExtension>
+    -->
+    <PropertyGroup>
+      <SdkFilename>%(SdkTarballItem.Filename)%(SdkTarballItem.Extension)</SdkFilename>
+      <SdkTarballPath Condition="'$(SdkTarballPath)' == ''">%(SdkTarballItem.Identity)</SdkTarballPath>
+      <SourceBuiltSdkVersion>$(SdkFilename.Replace('$(SdkFilenamePrefix)','').Replace('-$(TargetRid)$(ArchiveExtension)',''))</SourceBuiltSdkVersion>
+    </PropertyGroup>
   </Target>
 
-  <!--
-    Determines if a project is a test project by checking the TestProject property and returning an item with the full path to the project file and its test type.
-  -->
-  <Target Name="IsTestProject"
-          Returns="@(TestProject)"
-          Condition="'$(TestProject)' == 'true'">
+  <Target Name="DetermineSourceBuiltRuntimeVersion">
+    <PropertyGroup>
+      <RuntimeFilenamePrefix>dotnet-runtime-</RuntimeFilenamePrefix>
+    </PropertyGroup>
+
     <ItemGroup>
-      <TestProject Include="$(MSBuildProjectFullPath)"
-                   TestType="$(TestProjectType)"
-                   ProjectName="$(MSBuildProjectName)" />
+      <RuntimeArchiveItem Include="$(ArtifactsAssetsDir)Runtime/**/$(RuntimeFilenamePrefix)*$(ArchiveExtension)"
+                          Exclude="$(ArtifactsAssetsDir)Runtime/**/$(RuntimeFilenamePrefix)*.wixpack.zip" />
     </ItemGroup>
+
+    <Error Text="Didn't find a runtime archive." Condition="'@(RuntimeArchiveItem)' == ''" />
+    <Error Text="Found more than one runtime archive." Condition="@(RuntimeArchiveItem->Count()) &gt; 1" />
+
+    <!--
+      Extract runtime version from the dotnet-runtime archive filename.
+      Keep in sync with dotnet-runtime's archive location and filename.
+
+      Example:
+      artifacts\assets\<config>\Runtime\9.0.100-alpha.1.24057.1\dotnet-runtime-9.0.100-alpha.1.24057.1-fedora.38-x64.tar.gz
+      artifacts\assets\<config>\Runtime\<RuntimeVersion>\dotnet-runtime-<RuntimeVersion>-<TargetRid><ArchiveExtension>
+    -->
+    <PropertyGroup>
+      <RuntimeFilename>%(RuntimeArchiveItem.Filename)%(RuntimeArchiveItem.Extension)</RuntimeFilename>
+      <RuntimeArchivePath>%(RuntimeArchiveItem.Identity)</RuntimeArchivePath>
+      <SourceBuiltRuntimeVersion>$(RuntimeFilename.Replace('$(RuntimeFilenamePrefix)','').Replace('-$(TargetRid)$(ArchiveExtension)',''))</SourceBuiltRuntimeVersion>
+    </PropertyGroup>
   </Target>
 
-  <!--
-    Determines if a project supports a specified target framework.  This target first calls GetProjectTargetFrameworks to get a list of target frameworks that the project supports, then filters the list down to the specified target framework.
-    If the specified framework is supported, the target returns an item with the full path to the project file, otherwise it returns nothing which will signal that the project does not support that target framework.
-  -->
-  <Target Name="DoesProjectSupportTargetFramework"
-          DependsOnTargets="GetProjectTargetFrameworks"
-          Returns="@(_SupportedProject)">
+  <ItemGroup>
+    <!-- Binplace all assets and packages to ArtifactsStagingDir. -->
+    <BinPlaceDir Include="$(ArtifactsStagingDir)" Condition="'$(ArtifactsStagingDir)' != ''" />
+  </ItemGroup>
+
+  <Target Name="BinPlaceFiles"
+          AfterTargets="Build"
+          Condition="'@(BinPlaceDir)' != '' and '@(BinPlaceFile)' != ''"
+          Inputs="@(BinPlaceDir);%(BinPlaceDir.Identity)"
+          Outputs="unused">
+    <PropertyGroup>
+      <_BinPlaceDir>%(BinPlaceDir.Identity)</_BinPlaceDir>
+    </PropertyGroup>
+
     <ItemGroup>
-      <_SupportedProject Include="%(ProjectTargetFramework.ProjectFile)"
-                         ProjectName="$(MSBuildProjectName)"
-                         Condition="'%(Identity)' == '$(ProjectTargetFramework)'" />
+      <_BinPlaceFileWithFullTargetPath Include="@(BinPlaceFile)">
+        <TargetPath Condition="'%(BinPlaceFile.TargetPath)' != ''">%(BinPlaceFile.TargetPath)</TargetPath>
+        <TargetPath Condition="'%(BinPlaceFile.TargetPath)' == ''">$([MSBuild]::MakeRelative('$(ArtifactsDir)', '%(BinPlaceFile.Identity)'))</TargetPath>
+      </_BinPlaceFileWithFullTargetPath>
     </ItemGroup>
+
+    <Copy SourceFiles="@(_BinPlaceFileWithFullTargetPath)"
+          DestinationFiles="@(_BinPlaceFileWithFullTargetPath -> '$([MSBuild]::EnsureTrailingSlash('$(_BinPlaceDir)'))%(TargetPath)')"
+          SkipUnchangedFiles="true"
+          OverwriteReadOnlyFiles="true"
+          Retries="$(CopyRetryCount)"
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+          UseHardlinksIfPossible="true" />
   </Target>
-  
-  <Import Project="eng\dotnet-build\ExcludeFromDotNetBuild.AfterCommonTargets.targets" Condition="'$(DotNetBuildRepo)' == 'true'" />
+
 </Project>

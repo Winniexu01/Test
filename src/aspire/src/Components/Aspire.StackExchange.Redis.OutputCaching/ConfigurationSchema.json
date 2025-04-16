@@ -1,0 +1,11 @@
+{
+  "definitions": {
+    "logLevel": {
+      "properties": {
+        "Microsoft.AspNetCore.OutputCaching.StackExchangeRedis": {
+          "$ref": "#/definitions/logLevelThreshold"
+        }
+      }
+    }
+  }
+}

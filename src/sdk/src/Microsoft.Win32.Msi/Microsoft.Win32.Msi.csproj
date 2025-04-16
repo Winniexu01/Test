@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <TargetFrameworks>$(SdkTargetFramework);net472</TargetFrameworks>
+    <OutputType>library</OutputType>
+    <RootNamespace>Microsoft.Win32.Msi</RootNamespace>
+  </PropertyGroup>
+</Project>

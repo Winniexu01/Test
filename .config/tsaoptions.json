@@ -1,9 +1,10 @@
 {
-    "tsaVersion": "TsaV2",
-    "codebaseName": "NuGet.Client-Trusted_dev",
-    "instanceUrl": "DEVDIV",
-    "projectName": "DevDiv",
-    "areaPath": "DevDiv\\NuGet\\NuGet Clients",
+    "instanceUrl": "https://devdiv.visualstudio.com/",
+    "template": "TFSDEVDIV",
+    "projectName": "DEVDIV",
+    "areaPath": "DevDiv\\.NET Shared\\VMR",
     "iterationPath": "DevDiv",
-    "allTools": true
+    "notificationAliases": [ "netvmr-lt@microsoft.com" ],
+    "repositoryName": "dotnet-dotnet",
+    "codebaseName": "dotnet-dotnet"
 }

@@ -1,0 +1,22 @@
+<Project>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
+
+  <PropertyGroup>
+    <Copyright>$(CopyrightNetFoundation)</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <IsPackable>true</IsPackable>
+    <!--
+      Arcade defaults Serviceable to 'true'. Reset it, to use the value in the nuspec. Improves
+      equality with real packages.
+    -->
+    <Serviceable />
+    <CustomizationsPrefix>Customizations</CustomizationsPrefix>
+    <CustomizationsPropsFile>$(CustomizationsPrefix).props</CustomizationsPropsFile>
+    <CustomizationsSourceFile>$(CustomizationsPrefix).cs</CustomizationsSourceFile>
+
+    <!-- Only upgrade NuGetAudit warnings to errors for official builds. -->
+    <WarningsNotAsErrors Condition="'$(OfficialBuild)' != 'true'">$(WarningsNotAsErrors);NU1901;NU1902;NU1903;NU1904</WarningsNotAsErrors>
+  </PropertyGroup>
+
+</Project>
