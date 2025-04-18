@@ -6,6 +6,9 @@
 trigger:
 - main
 
+variables:
+  RUN_SECURITY-SCAN: false
+
 jobs:
 - job: MultiConatiner
   pool:
@@ -13,5 +16,5 @@ jobs:
   container:
    image: wenwen01/preps:ubuntu-sdk-2204
   steps:
-  - script: echo Pass
+  - script: dotnet --version
     displayName: 'test'
